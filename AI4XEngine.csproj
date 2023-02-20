@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net4.7</TargetFramework>
+    <OutputType>library</OutputType>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="DotnetNoise" Version="1.0.0" />
+    <Content Include="AI4XEngine\Engine\NoiseMapGenerator.cs" />
+    <Content Include="AI4XEngine\Engine\Gamestate.cs" />
+    <Content Include="AI4XEngine\Engine\StarNames.txt" />
+    <Content Include="AI4XEngine\Engine\Position.cs" />
+    <Content Include="AI4XEngine\EngineInterface\EngineInt.cs" />
+    <Content Include="AI4XEngine\Engine\StellarClass.cs" />
+    <Content Include="AI4XEngine\Engine\StarSystem.cs" />
+    <Content Include="AI4XEngine\Engine\Sector.cs" />
+    <Content Include="AI4XEngine\Engine\Player.cs" />
+    <Content Include="AI4XEngine\Engine\GameObjectType.cs" />
+    <Content Include="AI4XEngine\Engine\GameObject.cs" />
+    <Content Include="AI4XEngine\Engine\GameManager.cs" />
+    <Content Include="AI4XEngine\Engine\Faction.cs" />
+  </ItemGroup>
+</Project>

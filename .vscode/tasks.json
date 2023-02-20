@@ -1,0 +1,82 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "dependsOn": ["dotnet build", "dotnet publish", "mono build","python build", "copy namelists"],
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "dotnet build",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "build",
+                "--output",
+                "${config:buildOutputDirectory}",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "dotnet publish",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "publish"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "mono build",
+            "command": "mono",
+            "type": "shell",
+            "args": [
+                "--aot",
+                "${config:publishOutputDirectory}${pathSeparator}AI4XEngine.dll"
+            ],
+            "group": "build",
+            "presentation": {
+                "focus": true
+            }
+        },
+        /*{
+            "label": "python build",
+            "command": "pex"
+        },*/
+        {
+            "label": "copy namelists",
+            "group": "build",
+            "type": "shell",
+            "command": "cp ${workspaceFolder}/AI4XEngine/Engine/StarNames.txt ${config:publishOutputDirectory}/StarNames.txt",
+            "windows": "Copy-Item '${workspaceFolder}\\AI4XEngine\\Engine\\StarNames.txt' -Destination '${config:publishOutputDirectory}\\StarNames.txt",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "clean saves",
+            "command": "rm ${workspaceFolder}/Saves/*",
+            "windows": "Remove-Item ${workspaceFolder}\\Saves\\*",
+            "group": "none",
+            "type": "shell",
+            "presentation": {
+                "focus": true
+            }
+        }
+    ]
+}

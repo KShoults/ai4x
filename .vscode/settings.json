@@ -1,0 +1,11 @@
+{
+    "buildOutputDirectory" : "~/dev/ai4x/bin/Debug/net4.7",
+    "publishOutputDirectory": "~/dev/ai4x/bin/Debug/net4.7/publish",
+    "python.linting.enabled": true,
+    "python.linting.ignorePatterns": [
+        "**/site-packages/**/*.py",
+        ".vscode/*.py",
+        "/usr/lib/python*/**/*.py"
+    ],
+    "java.compile.nullAnalysis.mode": "disabled"
+}
