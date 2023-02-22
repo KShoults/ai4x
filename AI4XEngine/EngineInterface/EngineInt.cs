@@ -39,7 +39,7 @@ namespace EngineInterface
         /// a list of Order objects that are to be applied to units before
         /// the save is advanced.
         /// </param>
-        public static int EndTurn(string savePath, string[] orders)
+        public static int EndTurn(string savePath, Order[] orders)
         {
             Gamestate oldGamestate = LoadGamestate(savePath);
             Gamestate newGamestate = GameManager.EndTurn(oldGamestate, orders);

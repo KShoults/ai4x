@@ -7,14 +7,18 @@ namespace Engine
     public class Order
     {
         /// <summary>
+        /// the objectId of the order's owner.
+        /// </summary>
+        public int OwnerId { get; set; }
+        /// <summary>
+        /// the objectId of the target.
+        /// </summary>
+        public int TargetId { get; set; }
+        /// <summary>
         /// determines whether this order should be automatically
         /// reissued at the start of the next turn.
         /// </summary>
         public bool Repeating { get; set; }
-        /// <summary>
-        /// the faction id of the target's owner.
-        /// </summary>
-        public int TargetId { get; set; }
         /// <summary>
         /// determines the action to take for this order.
         /// </summary>

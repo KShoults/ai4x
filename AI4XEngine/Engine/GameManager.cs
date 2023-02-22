@@ -68,16 +68,39 @@ namespace Engine
         /// the instance of <c>Gamestate</c> to be advanced.
         /// </param>
         /// <param name="orders">
-        /// a collection of <c>Order</c> instances to be applied before the
+        /// an array of <c>Order</c> instances to be applied before the
         /// turn advances.
         /// </param>
-        public static Gamestate EndTurn(Gamestate gamestate, string[] orders)
+        public static Gamestate EndTurn(Gamestate gamestate, Order[] orders)
         {
             // Initialize self from Gamestate
             InitializeFromGameState(gamestate);
-            // Apply orders to player's ships/planets
-
-            // Initiate end turn calculations
+            // Convert orders array into a dictionary with the objectId as the
+            // key.
+            var ordersDict = new Dictionary<int, Order>();
+            foreach (Order o in orders)
+            {
+                int objectId = o.OwnerId;
+                ordersDict.Add(objectId, o);
+            }
+            // Apply orders to player's ships/planets and initiate end turn
+            // calculations.
+            foreach (SortedDictionary<int, GameObject>[] faction in s_gameObjects)
+            {
+                foreach (SortedDictionary<int, GameObject> objectTypes in faction)
+                {
+                    foreach (KeyValuePair<int, GameObject> kvp in objectTypes)
+                    {
+                        GameObject gameObject = kvp.Value;
+                        Order newOrder = null;
+                        if (ordersDict.ContainsKey(gameObject.ObjectId))
+                        {
+                            newOrder = ordersDict[gameObject.ObjectId];
+                        }
+                        gameObject.EndTurn(newOrder);
+                    }
+                }
+            }
 
             s_currentTurn += 1;
             // Create the new Gamestate and return it

@@ -4,7 +4,7 @@ namespace Engine
     /// Class <c>GameObject</c> specifically refers to ownable and orderable
     /// elements of the game.
     /// </summary>
-    public class GameObject
+    public abstract class GameObject
     {
         /// <summary>
         /// the unique id of the <c>GameObject</c>'s owner.
@@ -66,5 +66,15 @@ namespace Engine
         {
             OwnerId = newOwner;
         }
+
+        /// <summary>
+        /// Applies a new order and calculates the gameobject's state for the
+        /// next turn.
+        /// </summary>
+        /// <param name="newOrder">
+        /// the new orders for this object (optional).
+        /// </param>
+        /// <returns></returns>
+        public abstract int EndTurn(Order newOrder = null);
     }
 }
