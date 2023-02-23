@@ -7,9 +7,9 @@ namespace Engine
     public abstract class GameObject
     {
         /// <summary>
-        /// the unique id of the <c>GameObject</c>'s owner.
+        /// the <c>GameObject</c>'s owner.
         /// </summary>
-        public int OwnerId { get; set; }
+        public Faction Owner { get; set; }
         /// <summary>
         /// the <c>GameObjectType</c> of this <c>GameObject</c>.
         /// </summary>
@@ -36,18 +36,18 @@ namespace Engine
         /// <summary>
         /// Initializes an instance of the <c>GameObject</c> class.
         /// </summary>
-        /// <param name="ownerId">
+        /// <param name="owner">
         /// <summary>
-        /// the unique id of the <c>GameObject</c>'s owner.
+        /// an instance of the <c>Faction</c> class owning this object.
         /// </summary>
         /// </param>
         /// <param name="type">
         /// <summary>
         /// the <c>GameObjectType</c> of this <c>GameObject</c>.
         /// </summary></param>
-        public GameObject(int ownerId, GameObjectType type)
+        public GameObject(Faction owner, GameObjectType type)
         {
-            OwnerId = ownerId;
+            Owner = owner;
             Type = type;
             ObjectId = GameManager.RegisterGameObject(this);
         }
@@ -56,15 +56,15 @@ namespace Engine
         /// Changes the owner of this gameobject.
         /// </summary>
         /// <param name="newOwner">
-        /// the unique id of the new owner.
+        /// an instance of the <c>Faction</c> class to change ownership to.
         /// </param>
         /// <remarks>
         /// Will probably need extra code when ownership of a GameObject
         /// changes such as clearing its current orders.
         /// </remarks>
-        public void ChangeOwner(int newOwner)
+        public void ChangeOwner(Faction newOwner)
         {
-            OwnerId = newOwner;
+            Owner = newOwner;
         }
 
         /// <summary>

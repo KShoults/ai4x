@@ -23,14 +23,14 @@ namespace Engine
         // Next id when generating factions
         private static int s_nextFactionId = 0;
         // Next id when generating everything else categorized by GameObjectType
-        private static readonly int[] s_nextGameObjectIds = new int[Enum.GetNames(typeof(GameObjectType)).Length];
+        private static readonly SortedDictionary<GameObjectType, int> s_nextGameObjectIds = new SortedDictionary<GameObjectType, int>();
         // The list of Factions referenced by FactionId
         private static readonly SortedDictionary<int, Faction> s_factions = new SortedDictionary<int, Faction>();
-        // The lookup list for GameObjects is categorized by Faction,
+        // The lookup dictionary for GameObjects is categorized by Faction,
         // then GameObjectType. It's then sorted by GameObjectId.
         // I'm sacrificing readability for lookup speed here,
         // but I think it's necessary.
-        private static readonly List<SortedDictionary<int, GameObject>[]> s_gameObjects = new List<SortedDictionary<int, GameObject>[]>();
+        private static readonly SortedDictionary<int, SortedDictionary<GameObjectType, SortedDictionary<int, GameObject>>> s_gameObjects = new SortedDictionary<int, SortedDictionary<GameObjectType, SortedDictionary<int, GameObject>>>();
         // The shuffled list of star names that can still be used in this game
         private static readonly Stack<string> s_starNameList = new Stack<string>();
         // Set the absolute path to the StarNames.txt relative to the assembly's directory
@@ -85,11 +85,11 @@ namespace Engine
             }
             // Apply orders to player's ships/planets and initiate end turn
             // calculations.
-            foreach (SortedDictionary<int, GameObject>[] faction in s_gameObjects)
+            foreach (KeyValuePair<int, SortedDictionary<GameObjectType, SortedDictionary<int, GameObject>>> faction in s_gameObjects)
             {
-                foreach (SortedDictionary<int, GameObject> objectTypes in faction)
+                foreach (KeyValuePair<GameObjectType, SortedDictionary<int, GameObject>> objectTypes in faction.Value)
                 {
-                    foreach (KeyValuePair<int, GameObject> kvp in objectTypes)
+                    foreach (KeyValuePair<int, GameObject> kvp in objectTypes.Value)
                     {
                         GameObject gameObject = kvp.Value;
                         Order newOrder = null;
@@ -116,12 +116,12 @@ namespace Engine
         public static int RegisterGameObject(GameObject gameObject)
         {
             // Get the next id for the ObjectType
-            int id = s_nextGameObjectIds[(int)gameObject.Type];
+            int id = s_nextGameObjectIds[gameObject.Type];
 
-            s_gameObjects[gameObject.OwnerId][(int)gameObject.Type].Add(gameObject.ObjectId, gameObject);
+            s_gameObjects[gameObject.Owner.FactionId][gameObject.Type].Add(gameObject.ObjectId, gameObject);
 
             // Return the next id for the ObjectType
-            s_nextGameObjectIds[((int)gameObject.Type)] = id++;
+            s_nextGameObjectIds[gameObject.Type] = id++;
             return id;
         }
 
@@ -141,13 +141,15 @@ namespace Engine
 
             // Add a new faction category to the GameObjects list
             // First initialize a new SortedDictionary<Gameobjects>[] for the faction
-            SortedDictionary<int, GameObject>[] newArray = new SortedDictionary<int, GameObject>[Enum.GetNames(typeof(GameObjectType)).Length];
+            SortedDictionary<GameObjectType, SortedDictionary<int, GameObject>> newDictionary = new SortedDictionary<GameObjectType, SortedDictionary<int, GameObject>>();
+            string[] typeStrings = Enum.GetNames(typeof(Resource));
+            Array.Sort(typeStrings);
             // Then initialize each SortedDictionary for each GameObjectType
-            for (int i = 0; i < newArray.Length; i++)
+            foreach (string t in typeStrings)
             {
-                newArray[i] = new SortedDictionary<int, GameObject>();
+                newDictionary.Add((GameObjectType)Enum.Parse(typeof(GameObjectType), t), new SortedDictionary<int, GameObject>());
             }
-            s_gameObjects.Add(newArray);
+            s_gameObjects.Add(id, newDictionary);
 
             return id;
         }
@@ -232,10 +234,13 @@ namespace Engine
         /// </summary>
         private static void InitializeLists()
         {
+            string[] typeStrings = Enum.GetNames(typeof(Resource));
+            Array.Sort(typeStrings);
             // Initialize NextGameObjectIds array
-            for (int i = 0; i < s_nextGameObjectIds.Length; i++)
+            foreach (string t in typeStrings)
             {
-                s_nextGameObjectIds[i] = 0;
+                GameObjectType typeEnum = (GameObjectType)Enum.Parse(typeof(GameObjectType), t);
+                s_nextGameObjectIds.Add(typeEnum, 0);
             }
         }
 
@@ -302,11 +307,11 @@ namespace Engine
             }
 
             List<GameObject> savedGameObjects = new List<GameObject>();
-            foreach (SortedDictionary<int, GameObject>[] owner in s_gameObjects)
+            foreach (KeyValuePair<int, SortedDictionary<GameObjectType, SortedDictionary<int, GameObject>>> owner in s_gameObjects)
             {
-                foreach (SortedDictionary<int, GameObject> objectType in owner)
+                foreach (KeyValuePair<GameObjectType, SortedDictionary<int, GameObject>> objectType in owner.Value)
                 {
-                    foreach (KeyValuePair<int, GameObject> o in objectType)
+                    foreach (KeyValuePair<int, GameObject> o in objectType.Value)
                     {
                         savedGameObjects.Add(o.Value);
                     }
@@ -377,22 +382,21 @@ namespace Engine
         private static bool PopulateGameObjectsFromList(List<GameObject> objects)
         {
             // Prepare the GameObjects list
+            // Get an array of the names of the enum entries
+            string[] typeStrings = Enum.GetNames(typeof(GameObjectType));
 
-            // Determine how many GameObjectTypes we have
-            int numGameObjectTypes = Enum.GetValues(typeof(GameObjectType)).Length;
-
-            for (int f = 0; f < s_factions.Count; f++)
+            foreach (KeyValuePair<int, Faction> f in s_factions)
             {
                 // Add a GameObject dictionary by GameObjectType for each faction
-                SortedDictionary<int, GameObject>[] factionUnits = new SortedDictionary<int, GameObject>[numGameObjectTypes];
+                SortedDictionary<GameObjectType, SortedDictionary<int, GameObject>> factionUnits = new SortedDictionary<GameObjectType, SortedDictionary<int, GameObject>>();
 
                 // Add a GameObject dictionary for each GameObjectType
-                for (int i = 0; i < numGameObjectTypes; i++)
+                foreach (string s in typeStrings)
                 {
-                    factionUnits[i] = new SortedDictionary<int, GameObject>();
+                    factionUnits[(GameObjectType)Enum.Parse(typeof(GameObjectType), s)] = new SortedDictionary<int, GameObject>();
                 }
 
-                s_gameObjects.Add(factionUnits);
+                s_gameObjects.Add(f.Key, factionUnits);
             }
             // GameObjects list is now prepared
 
@@ -402,29 +406,29 @@ namespace Engine
                 // Make sure the ObjectId isn't in any faction with the same GameObjectType
                 foreach (KeyValuePair<int, Faction> f in s_factions)
                 {
-                    if (s_gameObjects[f.Key][(int)o.Type].ContainsKey(o.ObjectId))
+                    if (s_gameObjects[f.Key][o.Type].ContainsKey(o.ObjectId))
                     {
                         Console.Error.WriteLine("GameObject with duplicate ObjectId detected.");
                         return false;
                     }
                 }
-                    s_gameObjects[o.OwnerId][(int)o.Type].Add(o.ObjectId, o);
+                    s_gameObjects[o.Owner.FactionId][o.Type].Add(o.ObjectId, o);
             }
 
             // Determine the NextGameObjectIds by checking every faction at the GameObjectType for the highest id
-            for (int i = 0; i < s_nextGameObjectIds.Length; i++)
+            foreach (KeyValuePair<GameObjectType, int> i in s_nextGameObjectIds)
             {
                 int highestId = 0;
                 for (int f = 0; f < s_factions.Count; f++)
                 {
                     // Last is slow but this is only run once per end turn action
-                    int highestKey = s_gameObjects[f][i].Last().Key;
+                    int highestKey = s_gameObjects[f][i.Key].Last().Key;
                     if (highestKey > highestId)
                     {
                         highestId = highestKey;
                     }
                 }
-                s_nextGameObjectIds[i] = highestId + 1;
+                s_nextGameObjectIds[i.Key] = highestId + 1;
             }
 
             return true;
