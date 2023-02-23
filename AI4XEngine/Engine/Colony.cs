@@ -40,7 +40,8 @@ namespace Engine
         /// <returns></returns>
         public override int EndTurn(Order newOrder = null)
         {
-            CurrentOrder = newOrder;
+            if (newOrder != null)
+                CurrentOrder = newOrder;
             
             return 0;
         }

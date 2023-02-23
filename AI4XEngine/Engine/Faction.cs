@@ -1,3 +1,4 @@
+using System;
 namespace Engine
 {
     /// <summary>
@@ -14,6 +15,10 @@ namespace Engine
         /// the name of this faction.
         /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// the resources held by this faction.
+        /// </summary>
+        public int[] Resources { get; set; } = new int[Enum.GetNames(typeof(Resource)).Length];
 
 
 
